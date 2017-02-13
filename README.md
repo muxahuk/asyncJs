@@ -89,7 +89,7 @@ In this example .resolve will console.log the 42
 The reject method is returning error resolved promise, with an error you pass in.
 In this example .resolve will wil console.error the "error message"
 
-And 2 methods that are applyed to multiple promises are race and all.
+And 2 methods that are applyed to collection of promises are race and all.
 The race method accepts any iterable ( array for example ) with promises as values. And whenever any promise is resolved firs he's resolved value, witch can be eather success or false is beinge the result of Promise.race promise.
 So in this example .race will console.log 42
 The all method accepts any iterable ( array for example ) with promuses as values. And when all of the promises are resolved sucessfully it will be resolved sucefully, but if any of promises is resolved with error then result of this promise is error.
@@ -104,4 +104,11 @@ I have a promise witch is returning me number 19 as an answer and i can siply re
 At this point the only question you might have is "how does promises solves callback hell if you have to pass a callback in it ?".
 The Promises were designed to return that trust. 
 Promise was designed to be resolved or rejected only once. The messages that gets passed to the promise is always kept. The resolved value is immutable. It means that no one can change the result of you'r promise.
-This is a huge deal.
+This is a huge deal. Promises fixes all the issues related to inversion of control i was talking about before.
+
+Second callback hell fix is generators.
+What is generator ? Generator is a function that can be paused until someone calls a mthod to contunue it's execution till the next stop.
+You all know this quest game, where you have to run to some stop, solve the quiz question and then run to the next stop where is next question. The generators are most alike with this game. On the first call generator is being run till the first stop, then it solves the question or in our examples we will be solving promises and then when it's solved runs to the next stop.
+Hope overall it is clear how generator is working, let's dig in to it..
+When you create instance of generator it returns you Iterator instance. Iterator is a new thing that was introduced in es6 ( along with promises, generators and many other things ). The iterator instance has 3 methods, next, return, throw. The next method is running the code till next stop and when it stops its asking a question by passing whatever you type after yield keyword. Then you should answer this question when calling next next method. Another method of generators iterator is throw, witch allows you to throw any exception to generator. And if you have try catch block inside generator these exception can be caught. And last method is return, witch basically ends your generator iterator execution.
+
