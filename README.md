@@ -118,36 +118,36 @@ When you create generator it returns you Iterator instance. Iterator is a new th
 So, in order for generator to process this "question" and "answer" steps there is required some utility that will run generator throught. Actualy there are a lot of libraries that do that for example co, spawn atc.
 But we can create our own runner.. Basicaly they all do something similar to this example.
 
-function spawn (generator) {
-    return function () {
-        const iterator = generator.apply(null, arguments);
+    function spawn (generator) {
+        return function () {
+            const iterator = generator.apply(null, arguments);
 
-        function pass (result) {
-            try {
-                result = iterator.next(result);
-            } catch (e) {
-                return Promise.reject(e);
+            function pass (result) {
+                try {
+                    result = iterator.next(result);
+                } catch (e) {
+                    return Promise.reject(e);
+                }
+                return tick(result);
             }
-            return tick(result);
-        }
 
-        function fail (error) {
-            try {
-                error = iterator.throw(error);
-            } catch (e) {
-                return Promise.reject(e);
+            function fail (error) {
+                try {
+                    error = iterator.throw(error);
+                } catch (e) {
+                    return Promise.reject(e);
+                }
+                return tick(error);
             }
-            return tick(error);
+
+            function tick (step) {
+                if (step && step.done) return step.value;
+                const result = step ? Promise.resolve(step.value) : Promise.resolve(undefined);
+
+                return result.then(pass).catch(fail);
+            }
+
+            return Promise.resolve().then(tick);
         }
-
-        function tick (step) {
-            if (step && step.done) return step.value;
-            const result = step ? Promise.resolve(step.value) : Promise.resolve(undefined);
-
-            return result.then(pass).catch(fail);
-        }
-
-        return Promise.resolve().then(tick);
     }
-}
 
