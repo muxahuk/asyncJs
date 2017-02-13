@@ -107,8 +107,47 @@ Promise was designed to be resolved or rejected only once. The messages that get
 This is a huge deal. Promises fixes all the issues related to inversion of control i was talking about before.
 
 Second callback hell fix is generators.
-What is generator ? Generator is a function that can be paused until someone calls a mthod to contunue it's execution till the next stop.
-You all know this quest game, where you have to run to some stop, solve the quiz question and then run to the next stop where is next question. The generators are most alike with this game. On the first call generator is being run till the first stop, then it solves the question or in our examples we will be solving promises and then when it's solved runs to the next stop.
-Hope overall it is clear how generator is working, let's dig in to it..
-When you create instance of generator it returns you Iterator instance. Iterator is a new thing that was introduced in es6 ( along with promises, generators and many other things ). The iterator instance has 3 methods, next, return, throw. The next method is running the code till next stop and when it stops its asking a question by passing whatever you type after yield keyword. Then you should answer this question when calling next next method. Another method of generators iterator is throw, witch allows you to throw any exception to generator. And if you have try catch block inside generator these exception can be caught. And last method is return, witch basically ends your generator iterator execution.
+
+Generator is a function that can be paused until someone calls a method to contunue it's execution till the next stop.
+
+Most of you know this quest game, where you have to run to some stop, solve the quiz and then run to the next stop where is next question. The generators are most alike this game. On the first call generator is being run till the first stop, then it solves the question or in our examples we will be solving promises and then runs to the next stop and solves again.
+Hope overall it is clear how generators are working, let's dig in to them..
+
+When you create generator it returns you Iterator instance. Iterator is a new thing that was introduced in es6 ( along with promises, generators and many other things ). The generator instance has 3 methods, next, return and throw. The next method is running the code till next stop and when it stops its asking a question by passing whatever you type after yield keyword. Then you should answer this question when calling next method. Another method of generators iterator is throw, witch allows you to throw any exception to generator. And if you have try catch block inside generator these exception can be caught. And last method is return, witch basically ends your generator iterator execution.
+
+So, in order for generator to process this "question" and "answer" steps there is required some utility that will run generator throught. Actualy there are a lot of libraries that do that for example co, spawn atc.
+But we can create our own runner.. Basicaly they all do something similar to this example.
+
+function spawn (generator) {
+    return function () {
+        const iterator = generator.apply(null, arguments);
+
+        function pass (result) {
+            try {
+                result = iterator.next(result);
+            } catch (e) {
+                return Promise.reject(e);
+            }
+            return tick(result);
+        }
+
+        function fail (error) {
+            try {
+                error = iterator.throw(error);
+            } catch (e) {
+                return Promise.reject(e);
+            }
+            return tick(error);
+        }
+
+        function tick (step) {
+            if (step && step.done) return step.value;
+            const result = step ? Promise.resolve(step.value) : Promise.resolve(undefined);
+
+            return result.then(pass).catch(fail);
+        }
+
+        return Promise.resolve().then(tick);
+    }
+}
 
